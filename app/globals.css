@@ -1,0 +1,221 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --obsidian: #08080a;
+  --titanium: #e2e8f0;
+  --gold: #d4af37;
+  --neon: #00f0ff;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  background: var(--obsidian);
+  color: var(--titanium);
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-body), Inter, system-ui, sans-serif;
+}
+
+/* --- Scrollbar: hairline, on-brand --- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(226, 232, 240, 0.14);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.5);
+}
+
+/* ------------------------------------------------------------------ */
+/* 3D canvas interaction lock                                          */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The WebGL surface must own every gesture that starts on it.
+ *
+ * Without `touch-action: none` a one-finger drag that OrbitControls is using
+ * to rotate the car is ALSO interpreted by the browser as a page scroll on
+ * mobile — the car spins and the page jumps at the same time. `user-select`
+ * stops a long-press from selecting the HUD text underneath, and the
+ * -webkit- prefixed forms are still required by iOS Safari.
+ *
+ * NOTE ON SPECIFICITY
+ * These rules are intentionally written as one block covering both the
+ * wrapper and the canvas it contains, rather than two blocks with duplicate
+ * declarations. Two blocks both setting `touch-action` were being collapsed
+ * by the build's CSS minifier, which kept the LAST rule and silently dropped
+ * `touch-action: none` from the container — leaving the page scrollable
+ * during a drag. One block, no duplicate properties, nothing to collapse.
+ */
+.canvas-container,
+.canvas-container > div,
+.canvas-container canvas {
+  touch-action: none;
+  -ms-touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+.canvas-container canvas {
+  display: block;
+  outline: none;
+}
+
+/* R3F's inner wrapper divs must not re-enable touch panning. */
+.canvas-container > div {
+  height: 100%;
+  width: 100%;
+}
+
+/* ------------------------------------------------------------------ */
+/* iOS safe areas                                                      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Deck edge insets for notched devices.
+ *
+ * Applied as CSS custom properties so components can opt into whichever
+ * edge they sit against, rather than every element guessing at env().
+ */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* --- Utility layer: the house "chrome" language --- */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Titanium / chrome gradient type treatment */
+  .chrome-text {
+    background: linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #e2e8f0 38%,
+      #9aa3b2 58%,
+      #e2e8f0 78%,
+      #ffffff 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .gold-text {
+    background: linear-gradient(180deg, #f3e2a1 0%, #d4af37 55%, #8c6f1f 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Glass panel — the core HUD surface */
+  .glass-panel {
+    background: rgba(8, 8, 10, 0.42);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .glass-panel-strong {
+    background: rgba(8, 8, 10, 0.72);
+    backdrop-filter: blur(36px) saturate(160%);
+    -webkit-backdrop-filter: blur(36px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Hairline separators */
+  .hairline {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .noise-overlay::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Hide native scrollbar but keep scrolling */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Command-deck style button sweep */
+  .sweep {
+    position: relative;
+    overflow: hidden;
+  }
+  .sweep::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+      100deg,
+      transparent,
+      rgba(255, 255, 255, 0.22),
+      transparent
+    );
+    transform: skewX(-18deg);
+    transition: left 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .sweep:hover::before {
+    left: 140%;
+  }
+}
+
+@layer components {
+  .hud-label {
+    @apply font-mono text-[9px] uppercase tracking-ultra text-white/40;
+  }
+
+  .hud-value {
+    @apply font-display text-3xl font-bold leading-none text-titanium;
+  }
+}
+
+/* Respect users who don't want motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
